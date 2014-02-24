@@ -75,13 +75,16 @@
          componentDidMount : function (){
           var self = this
           this.props.chat.handleAllRooms(function (rooms){
-            self.state.rooms = rooms
-            self.setState(this.state)
+            self.setState({
+              rooms: rooms
+            })
           })
           this.props.chat.handleReceiveMessage(function (msg){
-            self.state.msgs.concat([msg])
-            console.log(msg)
-            self.setState(self.state)
+            var msgs = self.state.msgs.concat([msg])
+            console.log(msgs)
+            self.setState({
+              msgs : msgs
+            })
           })
         },
          sendMessage : function (msg){
