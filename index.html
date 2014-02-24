@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="bower_components/react/react.js"></script>
+    <script src="bower_components/react/JSXTransformer.js"></script>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container-fluid" id="chat"></div>
+    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="http://localhost/socket.io/socket.io.js"></script>
+    <script src="chatConnector.js"></script>
+    <script type="text/jsx">
+      /** @jsx React.DOM */
+
+      var SendMessage = React.createClass({
+        getInitialState: function() {
+           return {msg : ''}
+        },
+        render : function (){
+          var submitBtn = this.state.msg.length === 0 ? null : <input type="button" class="btn" onClick={this.send} value="send"/>
+          return (
+            <div id="sendMessage">
+            <input type="text" size="140" value={this.state.msg} onChange={this.checkLength}/>
+            {submitBtn}
+            </div>
+            );
+        },
+        checkLength : function (event){
+            var val = event.target.value
+            this.setState({
+              msg : val
+            })
+        },
+        send : function (){
+          this.setState({msg : ''})
+          this.props.handler(this.state.msg)
+        }
+      })
+
+      var Message = React.createClass({
+
+        render : function(){
+            return <p>{this.props.msg.message}</p>
+        }
+      })
+
+      var Messages = React.createClass({
+        render : function (){
+          return (
+            <div class="row" style={{height: "80%"}}>
+            {this.props.msgs.map(function (msg){
+              return <Message msg={msg} />
+            })}
+            </div>)
+        }
+      })
+
+      var ChatApp = React.createClass({
+         getInitialState: function(){
+           return {msgs : [],
+                   rooms : []}
+         },
+         render : function (){
+          console.log(this.state.rooms)
+          console.log(this.state.msgs)
+          return (
+            <div>
+            <Messages msgs={this.state.msgs} />
+            <SendMessage handler={this.sendMessage}/>
+            </div>
+            );
+         },
+         componentDidMount : function (){
+          var self = this
+          this.props.chat.handleAllRooms(function (rooms){
+            self.state.rooms = rooms
+            self.setState(this.state)
+          })
+          this.props.chat.handleReceiveMessage(function (msg){
+            self.state.msgs.concat([msg])
+            console.log(msg)
+            self.setState(self.state)
+          })
+        },
+         sendMessage : function (msg){
+          this.props.chat.sendMessage("foo", msg)
+        }
+      })
+
+      var chat = new ChatConnector('http://localhost');
+      chat.login(prompt("Please enter your name:"));
+
+      React.renderComponent(
+        <ChatApp chat={chat} />,
+        document.getElementById('chat')
+      );
+
+    </script>
+  </body>
+</html>
