@@ -57,6 +57,17 @@
         }
       })
 
+      var Rooms = React.createClass({
+
+        render : function(){
+          return (<ul>
+                  {this.props.rooms.map(function (room){
+                    return <li>{room}</li>
+                  })}
+                  </ul>)
+        }
+      })
+
       var ChatApp = React.createClass({
          getInitialState: function(){
            return {msgs : [],
@@ -67,6 +78,7 @@
           console.log(this.state.msgs)
           return (
             <div>
+            <Rooms rooms={this.state.rooms} />
             <Messages msgs={this.state.msgs} />
             <SendMessage handler={this.sendMessage}/>
             </div>
